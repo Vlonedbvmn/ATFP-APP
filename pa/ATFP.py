@@ -37,14 +37,14 @@ st.title("ATFP - AI Timeseries Forecasting Platform")
 
 st.subheader(
     "Вітаємо! Ви знаходитеся на сторінці проєкту, що представляє собою платформу для дослідників у галузі прогнозування часових рядів із використанням методів машинного навчання. Для початку роботи перейдіть до розділу 'Дані', щоб завантажити дані або обрати із запропонованих наборів даних, для яких Ви будете здійснювати прогнозування.")
-video_f = open("instruction_2.mp4", "rb")
-video_bytes = video_f.read()
-# st.subheader(" ")
-st.divider()
-# st.subheader(
-#     f"Зараз Ви обрали, що Ви '{st.session_state.role}' у сфері прогнозування часових рядів. Щоб змінити, просто оновіть сторінку")
-# if st.button("Оновити"):
-#     streamlit_js_eval(js_expressions="parent.window.location.reload()")
+# video_f = open("instruction_2.mp4", "rb")
+# video_bytes = video_f.read()
+# # st.subheader(" ")
 # st.divider()
-st.subheader("Відео інструкція користування застосунком")
-st.video(video_bytes)
+# # st.subheader(
+# #     f"Зараз Ви обрали, що Ви '{st.session_state.role}' у сфері прогнозування часових рядів. Щоб змінити, просто оновіть сторінку")
+# # if st.button("Оновити"):
+# #     streamlit_js_eval(js_expressions="parent.window.location.reload()")
+# # st.divider()
+# st.subheader("Відео інструкція користування застосунком")
+# st.video(video_bytes)
