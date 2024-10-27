@@ -50,73 +50,74 @@ def to_excel(df):
     processed_data = output.getvalue()
     return processed_data
 
-@st.cache_data(show_spinner="Проводимо тестування...")
+
 def anomal(datafra, freqs):
-    if st.session_state.date_not_n:
-        start_date = pd.to_datetime('2024-01-01')
-        freqs = "D"
-        datafra['ds'] = start_date + pd.to_timedelta(datafra['ds'] - 1, freqs)
-
-    datafra['ds'] = pd.to_datetime(datafra['ds'])
-    datafra = datafra.drop_duplicates(subset=['ds'])
-    datafra = datafra.set_index('ds').asfreq(freqs)
-    datafra = datafra.reset_index()
-    datafra['y'] = datafra['y'].interpolate()
-    datafra["unique_id"] = [0 for i in range(1, len(datafra) + 1)]
-    print("s;kgfoshdisdifsdf")
-    print(datafra)
-
-    q = int(round(len(datafra) * 0.01, 0))
-
-    # fcst = NeuralForecast(
-    #     models=[
-    #         NBEATSx(h=len(datafra),
-    #                 input_size=14*q,
-    #                 # output_size=horizon,
-    #                 max_steps=20,
-    #                 scaler_type='standard',
-    #                 start_padding_enabled=True
-    #                 ),
-    #
-    #     ],
-    #     freq=freqs
-    # )
-
-
-    # Define and train the NBEATSx model
-    model = NeuralForecast(
-        models=[
-            NBEATSx(h=len(datafra),
-                    input_size=30 * q,
-                    # output_size=horizon,
-                    max_steps=100,
-                    scaler_type='standard',
-                    start_padding_enabled=True
-                    ),
-
-        ],
-        freq=freqs
-    )
-    model.fit(datafra)  # Use the entire dataset for training
-
-    # Generate predictions
-    predictions = model.predict(datafra.head(1))
-    print("preds", "-"*100)
-    print(predictions)
-    datafra['NBEATSx'] = predictions['NBEATSx']
-    datafra['residuals'] = np.abs(datafra['y'] - datafra['NBEATSx'])
-
-    # Set anomaly threshold (adjust based on domain knowledge)
-    threshold = 4 * datafra['residuals'].std()
-    datafra['anomaly'] = datafra['residuals'] > threshold
-
-    # # Plot actual, predicted values, and anomalies using plotly
-
-    st.session_state.datanom = datafra.drop(['unique_id', 'residuals'], axis=1)
-    if st.session_state.date_not_n == True:
-        st.session_state.datanom["ds"] = [i for i in range(1, len(st.session_state.datanom) + 1)]
-    print("preds", "-" * 100)
-    print(st.session_state.datanom)
+    with st.spinner("Проводимо тестування")
+             if st.session_state.date_not_n:
+                 start_date = pd.to_datetime('2024-01-01')
+                 freqs = "D"
+                 datafra['ds'] = start_date + pd.to_timedelta(datafra['ds'] - 1, freqs)
+         
+             datafra['ds'] = pd.to_datetime(datafra['ds'])
+             datafra = datafra.drop_duplicates(subset=['ds'])
+             datafra = datafra.set_index('ds').asfreq(freqs)
+             datafra = datafra.reset_index()
+             datafra['y'] = datafra['y'].interpolate()
+             datafra["unique_id"] = [0 for i in range(1, len(datafra) + 1)]
+             print("s;kgfoshdisdifsdf")
+             print(datafra)
+         
+             q = int(round(len(datafra) * 0.01, 0))
+         
+             # fcst = NeuralForecast(
+             #     models=[
+             #         NBEATSx(h=len(datafra),
+             #                 input_size=14*q,
+             #                 # output_size=horizon,
+             #                 max_steps=20,
+             #                 scaler_type='standard',
+             #                 start_padding_enabled=True
+             #                 ),
+             #
+             #     ],
+             #     freq=freqs
+             # )
+         
+         
+             # Define and train the NBEATSx model
+             model = NeuralForecast(
+                 models=[
+                     NBEATSx(h=len(datafra),
+                             input_size=30 * q,
+                             # output_size=horizon,
+                             max_steps=100,
+                             scaler_type='standard',
+                             start_padding_enabled=True
+                             ),
+         
+                 ],
+                 freq=freqs
+             )
+             model.fit(datafra)  # Use the entire dataset for training
+         
+             # Generate predictions
+             predictions = model.predict(datafra.head(1))
+             print("preds", "-"*100)
+             print(predictions)
+             datafra['NBEATSx'] = predictions['NBEATSx']
+             datafra['residuals'] = np.abs(datafra['y'] - datafra['NBEATSx'])
+         
+             # Set anomaly threshold (adjust based on domain knowledge)
+             threshold = 4 * datafra['residuals'].std()
+             datafra['anomaly'] = datafra['residuals'] > threshold
+         
+             # # Plot actual, predicted values, and anomalies using plotly
+         
+             st.session_state.datanom = datafra.drop(['unique_id', 'residuals'], axis=1)
+             if st.session_state.date_not_n == True:
+                 st.session_state.datanom["ds"] = [i for i in range(1, len(st.session_state.datanom) + 1)]
+             print("preds", "-" * 100)
+             print(st.session_state.datanom)
 
 
 # if __name__ == "__main__":
