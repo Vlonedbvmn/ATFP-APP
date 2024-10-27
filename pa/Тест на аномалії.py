@@ -52,7 +52,7 @@ def to_excel(df):
 
 
 def anomal(datafra, freqs):
-    with st.spinner("Проводимо тестування"):
+    with st.spinner("Проводимо тестування..."):
         if st.session_state.date_not_n:
             start_date = pd.to_datetime('2024-01-01')
             freqs = "D"
