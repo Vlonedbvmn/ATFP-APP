@@ -22,7 +22,7 @@ means = {"Місяць": "M",
          }
 
 
-client = Groq(api_key="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")
+client = Groq(api_key="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")
 
 
 
