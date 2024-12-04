@@ -2,8 +2,8 @@ neuralforecast==1.7.4
 plotly==5.24.0
 XlsxWriter==3.2.0
 scikit-learn
-groq==0.2.0
+groq==0.1.0
 streamlit-js-eval==0.1.7
 streamlit-option-menu==0.4.0
 openpyxl==3.1.2
-openai==1.55.3
+openai==1.55.0
