@@ -740,7 +740,7 @@ def submit_data_SNN(datafra, iter, horizon, rarety, inp):
     import requests
     import json
     # URL to your forecast endpoint (adjust domain/IP and port as needed)
-    url = "https://8m19g3rrmp5fzb-8000.proxy.runpod.net/forecast"
+    url = "https://0wau472qsoe4b3-8000.proxy.runpod.net/forecast"
 
 
     # Convert the DataFrame into a list of dictionaries.
