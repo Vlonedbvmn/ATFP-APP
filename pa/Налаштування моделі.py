@@ -174,13 +174,13 @@ def df_to_windowed_df(dataframe, first_date_str, last_date_str, n=3, hor=7):
 def windowed_df_to_date_X_y(windowed_dataframe, hor):
     df_as_np = windowed_dataframe.to_numpy()
 
-    dates = df_as_np[:, 0]  # Extract dates
+    dates = df_as_np[:, 0]  #
 
-    # Extract the input matrix (X) excluding target columns
+
     middle_matrix = df_as_np[:, 1:-hor]
     X = middle_matrix.reshape((len(dates), middle_matrix.shape[1], 1))
 
-    # Extract the 7-day target matrix (Y)
+
     Y = df_as_np[:, -hor:]
 
     return dates, X.astype(np.float32), Y.astype(np.float32)
@@ -293,10 +293,10 @@ def submit_data_auto(datafra, iter, horizon, rarety):
             dpred["real"] = Y_test_df["y"]
             dpred["pred"] = forecasts["KAN"].values.tolist()
             dpred["unique_id"] = [i for i in range(1, len(dpred) + 1)]
-            # Create distplot with custom bin_size
+
             st.session_state.fig = go.Figure()
 
-            # Plot the data except the last seven days
+
             st.session_state.fig.add_trace(go.Scatter(
                 x=dpred["unique_id"],
                 y=dpred["real"],
@@ -305,7 +305,7 @@ def submit_data_auto(datafra, iter, horizon, rarety):
                 line=dict(color='blue')
             ))
 
-            # Plot the last seven days in a different color
+
             st.session_state.fig.add_trace(go.Scatter(
                 x=dpred["unique_id"],
                 y=dpred["pred"],
@@ -400,10 +400,10 @@ def submit_data_auto(datafra, iter, horizon, rarety):
             dpred["real"] = Y_test_df["y"]
             dpred["pred"] = forecasts["TimeMixer"].values.tolist()
             dpred["unique_id"] = [i for i in range(1, len(dpred) + 1)]
-            # Create distplot with custom bin_size
+
             st.session_state.fig = go.Figure()
 
-            # Plot the data except the last seven days
+
             st.session_state.fig.add_trace(go.Scatter(
                 x=dpred["unique_id"],
                 y=dpred["real"],
@@ -412,7 +412,7 @@ def submit_data_auto(datafra, iter, horizon, rarety):
                 line=dict(color='blue')
             ))
 
-            # Plot the last seven days in a different color
+
             st.session_state.fig.add_trace(go.Scatter(
                 x=dpred["unique_id"],
                 y=dpred["pred"],
@@ -600,10 +600,10 @@ def submit_data_KAN(datafra, iter, horizon, rarety, inp):
         dpred["real"] = Y_test_df["y"]
         dpred["pred"] = forecasts["KAN"].values.tolist()
         dpred["unique_id"] = [i for i in range(1, len(dpred) + 1)]
-        # Create distplot with custom bin_size
+
         st.session_state.fig = go.Figure()
 
-        # Plot the data except the last seven days
+
         st.session_state.fig.add_trace(go.Scatter(
             x=dpred["unique_id"],
             y=dpred["real"],
@@ -612,7 +612,7 @@ def submit_data_KAN(datafra, iter, horizon, rarety, inp):
             line=dict(color='blue')
         ))
 
-        # Plot the last seven days in a different color
+
         st.session_state.fig.add_trace(go.Scatter(
             x=dpred["unique_id"],
             y=dpred["pred"],
@@ -740,63 +740,52 @@ def submit_data_SNN(datafra, iter, horizon, rarety, inp):
     
         import requests
         import json
-        # URL to your forecast endpoint (adjust domain/IP and port as needed)
         url = "https://wvrtp7efbuzv24-8000.proxy.runpod.net/forecast"
     
     
-        # Convert the DataFrame into a list of dictionaries.
         payload = {
             "data": dafaf.to_dict(orient='records'),
-            "inp": inp,  # Example integer value for inp
-            "horiz": horizon,  # Example integer value for horiz
-            "iter": iter,  # Example integer value for iter
+            "inp": inp,
+            "horiz": horizon,
+            "iter": iter,  
         }
     
-        # Define the URL of your forecasting endpoint
-    
-        # Send a POST request with the JSON payload.
+
         response = requests.post(url, json=payload)
     
-        # Check and print the response.
+
         data = ""
         if response.status_code == 200:
             data = response.json().get("predictions")
-            # print("Forecast predictions:", data)
+
         else:
             print("Error:", response.status_code, response.text)
     
-        # data = json.loads(json_data)
-    
-        # --- Reconstruct the PyTorch model ---
-        # Instantiate a new model using the provided class and initialization parameters.
-        # Rebuild the state dictionary: convert lists back into tensors.
+
         model_state_serialized = data["model_state"]
         model_state = {k: torch.tensor(v) for k, v in model_state_serialized.items()}
-        # Load the state dictionary into the model.
-    
-    
-        # --- Reconstruct the RobustScaler ---
+
         scaler_data = data["robust_scaler"]
-        # Create a new RobustScaler instance using the saved parameters.
+
         robust_scaler = RobustScaler(**scaler_data["params"])
-        # Set the fitted attributes if available.
+     
         attributes = scaler_data.get("attributes", {})
         if "center_" in attributes:
             robust_scaler.center_ = np.array(attributes["center_"])
         if "scale_" in attributes:
             robust_scaler.scale_ = np.array(attributes["scale_"])
     
-        # --- Retrieve and reconstruct the additional tensor values and integer ---
+
         tensor_data = data["int_values"]
-        # Convert the lists back into PyTorch tensors.
+
         W_in = torch.tensor(tensor_data["W_in"])
         W_res = torch.tensor(tensor_data["W_res"])
-        reservoir_size = tensor_data["reser"]  # This remains an integer
+        reservoir_size = tensor_data["reser"] 
         beta = 0.5
         time_steps = 150
         spike_grad = surrogate.fast_sigmoid()
     
-        # # Define the SNN model
+
         class SNNRegression(nn.Module):
             def __init__(self, reservoir_size, output_size):
                 super(SNNRegression, self).__init__()
