@@ -213,7 +213,7 @@ def anomal(datafra, freqs):
         import requests
         import json
         # URL to your forecast endpoint (adjust domain/IP and port as needed)
-        url = "https://m32m8w492toizo-8000.proxy.runpod.net/forecast"
+        url = "https://wvrtp7efbuzv24-8000.proxy.runpod.net/forecast"
 
         # Convert the DataFrame into a list of dictionaries.
         dafaf['ds'] = dafaf['ds'].astype(str)
