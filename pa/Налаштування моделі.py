@@ -627,7 +627,7 @@ def submit_data_KAN(datafra, iter, horizon, rarety, inp):
         st.warning('Надано не коректні гіперпараметри', icon="⚠️")
 
 
-@st.cache_data(show_spinner="Робимо прогнозування...")
+# @st.cache_data(show_spinner="Робимо прогнозування...")
 def submit_data_SNN(datafra, iter, horizon, rarety, inp):
     # if st.session_state.date_not_n:
     print("no date")
