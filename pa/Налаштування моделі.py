@@ -629,509 +629,508 @@ def submit_data_KAN(datafra, iter, horizon, rarety, inp):
 
 # @st.cache_data(show_spinner="Робимо прогнозування...")
 def submit_data_SNN(datafra, iter, horizon, rarety, inp):
-    with st.spinner('Проводимо тестування...'):
     # if st.session_state.date_not_n:
-             print("no date")
-             print(datafra)
-             dafaf = datafra
-         
-             datafra['ds'] = [i for i in range(1, len(datafra) + 1)]
-             start_date = pd.to_datetime('2024-01-01')
-             rarety = "D"
-             datafra['ds'] = start_date + pd.to_timedelta(datafra['ds'] - 1, rarety)
-         
-             st.session_state.inp = inp
-             datafra['ds'] = pd.to_datetime(datafra['ds'])
-         
-             datafra = datafra.drop_duplicates(subset=['ds'])
-             # datafra['y'] = datafra['y'].interpolate()
-             mean = datafra.mean()
-             #
-             # datafra["y"].replace({"NaN": 10})
-             # # fill NaN values with the mean of each column
-         
-             datafra["unique_id"] = [0 for i in range(1, len(datafra) + 1)]
-             datafra.fillna(mean, inplace=True)
-         
-             st.session_state.df_forpred = datafra
-             dafaf['ds'] = dafaf['ds'].astype(str)
-             # datafra = datafra.set_index('ds').asfreq(rarety)
-             # datafra = datafra.reset_index()
-             #
-             # datafra.fillna(mean, inplace=True)
-         
-             print(datafra)
-         
-         
-         
-             print(datafra["ds"].tolist()[inp])
-             print(datafra["ds"].tolist()[-(horizon + 1)])
-         
-             windowed_df = df_to_windowed_df(datafra,
-                                             datafra["ds"].tolist()[inp],
-                                             datafra["ds"].tolist()[-(horizon+1)],
-                                             n=inp,
-                                             hor=horizon)
-         
-             dates, X, Y = windowed_df_to_date_X_y(windowed_df, hor=horizon)
-         
-             q_80 = int(len(dates) * .8)
-             q_90 = int(len(dates) * .9)
-         
-             dates_train, X_train, y_train = dates[:q_80], X[:q_80], Y[:q_80]
-         
-             dates_val, X_val, y_val = dates[q_80:q_90], X[q_80:q_90], Y[q_80:q_90]
-             dates_test, X_test, y_test = dates[q_90:], X[q_90:], Y[q_90:]
-         
-             print("__________________________________"*1000)
-             st.session_state.df_forpred = st.session_state.df_forpred.reset_index()
-             print(st.session_state.df_forpred)
-         
-             # try:
-         
-             # scaler = RobustScaler()
-             # orig_shape = X_train.shape
-             # print(X_train.reshape(-1, X_train.shape[-1]))
-             # X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(orig_shape)
-             # X_val = scaler.transform(X_val.reshape(-1, X_val.shape[-1])).reshape(X_val.shape)
-             # X_test = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
-             # st.session_state.scaler = scaler
-             # X_train = torch.tensor(X_train, dtype=torch.float32)
-             # X_val = torch.tensor(X_val, dtype=torch.float32)
-             # X_test = torch.tensor(X_test, dtype=torch.float32)
-             # y_train = torch.tensor(y_train, dtype=torch.float32)
-             # y_val = torch.tensor(y_val, dtype=torch.float32)
-             # y_test = torch.tensor(y_test, dtype=torch.float32)
-             #
-             # if len(y_train.shape) == 1:
-             #     y_train = y_train.unsqueeze(1)
-             # if len(y_val.shape) == 1:
-             #     y_val = y_val.unsqueeze(1)
-             # if len(y_test.shape) == 1:
-             #     y_test = y_test.unsqueeze(1)
-             #
-             # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-             #
-             # st.session_state.device = device
-             #
-             # def create_reservoir(input_dim, reservoir_size, spectral_radius=0.9):
-             #     W_in = torch.randn(reservoir_size, input_dim) * 0.1
-             #     W_res = torch.randn(reservoir_size, reservoir_size)
-             #
-             #     eigenvalues = torch.linalg.eigvals(W_res)
-             #     max_eigenvalue = torch.max(torch.abs(eigenvalues))
-             #     W_res = W_res * (spectral_radius / max_eigenvalue)
-             #
-             #     return W_in.to(device), W_res.to(device)
-             #
-             # input_dim = X_train.shape[1]
-             # print(input_dim)
-             # reservoir_size = 400
-             #
-             # W_in, W_res = create_reservoir(input_dim, reservoir_size)
-             # st.session_state.reser_size = reservoir_size
-             # st.session_state.win = W_in
-             # st.session_state.wres = W_res
-             # # SNN parameters
-             # beta = 0.5
-             # time_steps = 150
-             # spike_grad = surrogate.fast_sigmoid()
-             #
-         
-             import requests
-             import json
-             # URL to your forecast endpoint (adjust domain/IP and port as needed)
-             url = "https://wvrtp7efbuzv24-8000.proxy.runpod.net/forecast"
-         
-         
-             # Convert the DataFrame into a list of dictionaries.
-             payload = {
-                 "data": dafaf.to_dict(orient='records'),
-                 "inp": inp,  # Example integer value for inp
-                 "horiz": horizon,  # Example integer value for horiz
-                 "iter": iter,  # Example integer value for iter
-             }
-         
-             # Define the URL of your forecasting endpoint
-         
-             # Send a POST request with the JSON payload.
-             response = requests.post(url, json=payload)
-         
-             # Check and print the response.
-             data = ""
-             if response.status_code == 200:
-                 data = response.json().get("predictions")
-                 # print("Forecast predictions:", data)
-             else:
-                 print("Error:", response.status_code, response.text)
-         
-             # data = json.loads(json_data)
-         
-             # --- Reconstruct the PyTorch model ---
-             # Instantiate a new model using the provided class and initialization parameters.
-             # Rebuild the state dictionary: convert lists back into tensors.
-             model_state_serialized = data["model_state"]
-             model_state = {k: torch.tensor(v) for k, v in model_state_serialized.items()}
-             # Load the state dictionary into the model.
-         
-         
-             # --- Reconstruct the RobustScaler ---
-             scaler_data = data["robust_scaler"]
-             # Create a new RobustScaler instance using the saved parameters.
-             robust_scaler = RobustScaler(**scaler_data["params"])
-             # Set the fitted attributes if available.
-             attributes = scaler_data.get("attributes", {})
-             if "center_" in attributes:
-                 robust_scaler.center_ = np.array(attributes["center_"])
-             if "scale_" in attributes:
-                 robust_scaler.scale_ = np.array(attributes["scale_"])
-         
-             # --- Retrieve and reconstruct the additional tensor values and integer ---
-             tensor_data = data["int_values"]
-             # Convert the lists back into PyTorch tensors.
-             W_in = torch.tensor(tensor_data["W_in"])
-             W_res = torch.tensor(tensor_data["W_res"])
-             reservoir_size = tensor_data["reser"]  # This remains an integer
-             beta = 0.5
-             time_steps = 150
-             spike_grad = surrogate.fast_sigmoid()
-         
-             # # Define the SNN model
-             class SNNRegression(nn.Module):
-                 def __init__(self, reservoir_size, output_size):
-                     super(SNNRegression, self).__init__()
-                     self.lif1 = snn.Leaky(beta=beta, spike_grad=spike_grad)
-                     self.bn1 = nn.BatchNorm1d(reservoir_size)
-                     self.tcn1 = nn.Sequential(
-                         nn.Conv1d(in_channels=reservoir_size, out_channels=256, kernel_size=3, padding=1),
-                         nn.ReLU(),
-                         nn.BatchNorm1d(256),
-                         nn.Conv1d(in_channels=256, out_channels=128, kernel_size=3, padding=1),
-                         nn.ReLU(),
-                         nn.BatchNorm1d(128)
-                     )
-         
-                     self.lif2 = snn.Leaky(beta=beta, spike_grad=spike_grad)
-                     self.bn2 = nn.BatchNorm1d(128)
-                     self.tcn2 = nn.Sequential(
-                         nn.Conv1d(in_channels=128, out_channels=256, kernel_size=3, padding=1),
-                         nn.ReLU(),
-                         nn.BatchNorm1d(256),
-                         nn.Conv1d(in_channels=256, out_channels=output_size, kernel_size=3, padding=1)
-                     )
-         
-                 def forward(self, x):
-                     x = x.reshape(x.size(0), -1)
-         
-                     mem1 = self.lif1.init_leaky()
-                     for t in range(time_steps):
-                         spk1, mem1 = self.lif1(x, mem1)
-                     mem1 = self.bn1(mem1)
-         
-                     mem1 = mem1.unsqueeze(2)
-                     mem1 = self.tcn1(mem1).squeeze(2)
-         
-                     mem2 = self.lif2.init_leaky()
-                     for t in range(time_steps):
-                         spk2, mem2 = self.lif2(mem1, mem2)
-                     mem2 = self.bn2(mem2)
-         
-                     mem2 = mem2.unsqueeze(2)
-                     out = self.tcn2(mem2).squeeze(2)
-         
-                     return out
-         
-             output_dim = y_train.shape[1]
-             model = SNNRegression(reservoir_size, output_dim).to("cpu")
-             criterion = nn.MSELoss()
-             model.load_state_dict(model_state)
-         
-             st.session_state.device = "cpu"
-             st.session_state.reser_size = reservoir_size
-             st.session_state.win = W_in
-             st.session_state.wres = W_res
-             st.session_state.scaler = robust_scaler
-             # optimizer = torch.optim.Adam(model.parameters(), lr=0.1, weight_decay=1e-4)
-             #
-             # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5,
-             #                                                        verbose=True)
-             #
-             # # Data loaders
-             # batch_size = 32
-             # train_dataset = TensorDataset(X_train, y_train)
-             # val_dataset = TensorDataset(X_val, y_val)
-             # train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-             # val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-             #
-             # # Training loop
-             # epochs = iter
-             # train_losses = []
-             # val_losses = []
-             #
-             # for epoch in range(epochs):
-             #     model.train()
-             #     train_loss = 0
-             #
-             #     for X_batch, y_batch in train_loader:
-             #         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
-             #
-             #         # Reservoir computation
-             #         reservoir_state = []
-             #         for x in X_batch:
-             #             x = x.unsqueeze(0)  # Ensure x has a batch dimension
-             #             res_state = torch.tanh(W_in @ x.T + W_res @ torch.rand(reservoir_size, 1).to(device))
-             #             reservoir_state.append(res_state.squeeze(1))
-             #         reservoir_state = torch.stack(reservoir_state).to(device)
-             #
-             #         output = model(reservoir_state)
-             #         loss = criterion(output, y_batch)
-             #
-             #         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-             #
-             #         optimizer.zero_grad()
-             #         loss.backward()
-             #         optimizer.step()
-             #
-             #         train_loss += loss.item()
-             #
-             #     train_loss /= len(train_loader)
-             #     train_losses.append(train_loss)
-         
-                 # model.eval()
-                 # val_loss = 0
-                 # with torch.no_grad():
-                 #     for X_batch, y_batch in val_loader:
-                 #         X_batch, y_batch = X_batch.to("cpu"), y_batch.to("cpu")
-                 #
-                 #         reservoir_state = []
-                 #         for x in X_batch:
-                 #             x = x.unsqueeze(0)
-                 #             res_state = torch.tanh(W_in @ x.T + W_res @ torch.rand(reservoir_size, 1).to(device))
-                 #             reservoir_state.append(res_state.squeeze(1))
-                 #         reservoir_state = torch.stack(reservoir_state).to(device)
-                 #
-                 #         output = model(reservoir_state)
-                 #         loss = criterion(output, y_batch)
-                 #         val_loss += loss.item()
-                 #
-                 # val_loss /= len(val_loader)
-                 # val_losses.append(val_loss)
-                 # scheduler.step(val_loss)
-                 #
-                 # print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
-         
-             orig_shape = X_train.shape
-             print(X_train.reshape(-1, X_train.shape[-1]))
-             X_test = robust_scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
-             st.session_state.scaler = robust_scaler
-             X_test = torch.tensor(X_test, dtype=torch.float32)
-             y_test = torch.tensor(y_test, dtype=torch.float32)
-         
-             X_test, y_test = X_test.to("cpu"), y_test.to("cpu")
-             model.eval()
-             with torch.no_grad():
-                 reservoir_state = []
-                 for x in X_test:
-                     x = x.unsqueeze(0)
-                     res_state = torch.tanh(W_in @ x.T + W_res @ torch.rand(reservoir_size, 1).to("cpu"))
-                     reservoir_state.append(res_state.squeeze(1))
-                 reservoir_state = torch.stack(reservoir_state).to("cpu")
-         
-                 predictions = model(reservoir_state)
-                 test_loss = criterion(predictions, y_test)
-                 loses = []
-                 for i in range(len(predictions)):
-                     loses.append(criterion(predictions[i], y_test[i]))
-                 print(f"{min(loses):.4f}")
-                 ind = 0
-                 for i in range(len(loses)):
-                     if min(loses) == loses[i]: ind = i
-         
-             print(f"Test Loss: {test_loss:.4f}")
-         
-             st.session_state.horiz = horizon
-         
-             st.session_state.inst_name = "SNN"
-             st.session_state.model_forecast = model
-             st.session_state.mse = float(f"{min(loses):.4f}")
-             sample_idx = ind
-             single_prediction = predictions[sample_idx].cpu().numpy()
-             single_y_test = y_test[sample_idx].cpu().numpy()
-             times = [i for i in range(1, len(single_prediction)-1)]
-             # Create distplot with custom bin_size
-             st.session_state.fig = go.Figure()
-         
-             # Plot the data except the last seven days
-             st.session_state.fig.add_trace(go.Scatter(
-                 x=times,
-                 y=single_y_test,
-                 mode='lines',
-                 name='Дані',
-                 line=dict(color='blue')
-             ))
-         
-             # Plot the last seven days in a different color
-             st.session_state.fig.add_trace(go.Scatter(
-                 x=times,
-                 y=single_prediction,
-                 mode='lines',
-                 name='Прогноз',
-                 line=dict(color='green')
-             ))
-                 # st.session_state.fig = px.line(dpred, x='unique_id', y=['real', 'pred'], labels={'value': 'Y values', 'x': 'X values'})
-             # except Exception as ex:
-             #     print(ex)
-             #     st.warning('Надано не коректні гіперпараметри', icon="⚠️")
-         
-         
-         
-         @st.cache_data(show_spinner="Робимо прогнозування...")
-         def submit_data_TN(datafra, iter, horizon, rarety, inp):
-             if st.session_state.date_not_n:
-                 start_date = pd.to_datetime('2024-01-01')
-                 rarety = "D"
-                 datafra['ds'] = start_date + pd.to_timedelta(datafra['ds'] - 1, rarety)
-         
-             datafra['ds'] = pd.to_datetime(datafra['ds'])
-             datafra = datafra.drop_duplicates(subset=['ds'])
-             datafra = datafra.set_index('ds').asfreq(rarety)
-             datafra = datafra.reset_index()
-             datafra['y'] = datafra['y'].interpolate()
-             datafra["unique_id"] = [0 for i in range(1, len(datafra) + 1)]
-             print("s;kgfoshdisdifsdf")
-             print(datafra)
-             st.session_state.df_forpred = datafra
-             try:
-                 st.session_state.horiz = horizon
-                 q = int(round(len(datafra) * 0.1, 0))
-                 fcst = NeuralForecast(
-                     models=[
-                         TimesNet(h=horizon,
-                                  input_size=int(round(inp, 0)),
-                                  # output_size=horizon,
-                                  max_steps=iter,
-                                  scaler_type='standard',
-                                  start_padding_enabled=True
-                                  ),
-                     ],
-                     freq=rarety
-                 )
-         
-                 Y_train_df = datafra[:-horizon]
-                 Y_test_df = datafra[-horizon:]
-                 fcst.fit(df=Y_train_df)
-                 forecasts = fcst.predict(futr_df=Y_test_df)
-                 st.session_state.mse = mean_squared_error(Y_test_df["y"], forecasts["TimesNet"])
-                 st.session_state.inst_name = "TimesNet"
-                 st.session_state.model_forecast = fcst
-                 print(f'Mean Squared Error: {st.session_state.mse}')
-                 print(len(forecasts["TimesNet"]), len(Y_test_df["y"]))
-                 print(forecasts.columns)
-                 forecasts = forecasts.reset_index(drop=True)
-                 print(forecasts.columns.values)
-                 print(forecasts["TimesNet"].values.tolist())
-                 dpred = pd.DataFrame()
-                 dpred["real"] = Y_test_df["y"]
-                 dpred["pred"] = forecasts["TimesNet"].values.tolist()
-                 dpred["unique_id"] = [i for i in range(1, len(dpred) + 1)]
-                 # Create distplot with custom bin_size
-                 st.session_state.fig = go.Figure()
-         
-                 # Plot the data except the last seven days
-                 st.session_state.fig.add_trace(go.Scatter(
-                     x=dpred["unique_id"],
-                     y=dpred["real"],
-                     mode='lines',
-                     name='Дані',
-                     line=dict(color='blue')
-                 ))
-         
-                 # Plot the last seven days in a different color
-                 st.session_state.fig.add_trace(go.Scatter(
-                     x=dpred["unique_id"],
-                     y=dpred["pred"],
-                     mode='lines',
-                     name='Прогноз',
-                     line=dict(color='green')
-                 ))
-                 print(dpred)
-             except:
-                 st.warning('Надано не коректні гіперпараметри', icon="⚠️")
-         
-         
-         @st.cache_data(show_spinner="Робимо прогнозування...")
-         def submit_data_TM(datafra, iter, horizon, rarety, inp):
-             if st.session_state.date_not_n:
-                 start_date = pd.to_datetime('2024-01-01')
-                 rarety = "D"
-                 datafra['ds'] = start_date + pd.to_timedelta(datafra['ds'] - 1, rarety)
-         
-             datafra['ds'] = pd.to_datetime(datafra['ds'])
-             datafra = datafra.drop_duplicates(subset=['ds'])
-             datafra = datafra.set_index('ds').asfreq(rarety)
-             datafra = datafra.reset_index()
-             datafra['y'] = datafra['y'].interpolate()
-             datafra["unique_id"] = [0 for i in range(1, len(datafra) + 1)]
-             print("s;kgfoshdisdifsdf")
-             print(datafra)
-             st.session_state.df_forpred = datafra
-             try:
-                 st.session_state.horiz = horizon
-                 q = int(round(len(datafra) * 0.1, 0))
-                 fcst = NeuralForecast(
-                     models=[
-                         TimeMixer(h=horizon,
-                                   input_size=int(round(inp, 0)),
-                                   # output_size=horizon,
-                                   max_steps=iter,
-                                   scaler_type='standard',
-                                   start_padding_enabled=True,
-                                   n_series=1
-                                   ),
-                     ],
-                     freq=rarety
-                 )
-         
-                 Y_train_df = datafra[:-horizon]
-                 Y_test_df = datafra[-horizon:]
-                 fcst.fit(df=Y_train_df)
-                 forecasts = fcst.predict(futr_df=Y_test_df)
-                 st.session_state.mse = mean_squared_error(Y_test_df["y"], forecasts["TimeMixer"])
-                 st.session_state.inst_name = "TimeMixer"
-                 st.session_state.model_forecast = fcst
-                 print(f'Mean Squared Error: {st.session_state.mse}')
-                 print(len(forecasts["TimeMixer"]), len(Y_test_df["y"]))
-                 print(forecasts.columns)
-                 forecasts = forecasts.reset_index(drop=True)
-                 print(forecasts.columns.values)
-                 print(forecasts["TimeMixer"].values.tolist())
-                 dpred = pd.DataFrame()
-                 dpred["real"] = Y_test_df["y"]
-                 dpred["pred"] = forecasts["TimeMixer"].values.tolist()
-                 dpred["unique_id"] = [i for i in range(1, len(dpred) + 1)]
-                 # Create distplot with custom bin_size
-                 st.session_state.fig = go.Figure()
-         
-                 # Plot the data except the last seven days
-                 st.session_state.fig.add_trace(go.Scatter(
-                     x=dpred["unique_id"],
-                     y=dpred["real"],
-                     mode='lines',
-                     name='Дані',
-                     line=dict(color='blue')
-                 ))
-         
-                 # Plot the last seven days in a different color
-                 st.session_state.fig.add_trace(go.Scatter(
-                     x=dpred["unique_id"],
-                     y=dpred["pred"],
-                     mode='lines',
-                     name='Прогноз',
-                     line=dict(color='green')
-                 ))
-                 print(dpred)
-             except:
-                 st.warning('Надано не коректні гіперпараметри', icon="⚠️")
+    print("no date")
+    print(datafra)
+    dafaf = datafra
+
+    datafra['ds'] = [i for i in range(1, len(datafra) + 1)]
+    start_date = pd.to_datetime('2024-01-01')
+    rarety = "D"
+    datafra['ds'] = start_date + pd.to_timedelta(datafra['ds'] - 1, rarety)
+
+    st.session_state.inp = inp
+    datafra['ds'] = pd.to_datetime(datafra['ds'])
+
+    datafra = datafra.drop_duplicates(subset=['ds'])
+    # datafra['y'] = datafra['y'].interpolate()
+    mean = datafra.mean()
+    #
+    # datafra["y"].replace({"NaN": 10})
+    # # fill NaN values with the mean of each column
+
+    datafra["unique_id"] = [0 for i in range(1, len(datafra) + 1)]
+    datafra.fillna(mean, inplace=True)
+
+    st.session_state.df_forpred = datafra
+    dafaf['ds'] = dafaf['ds'].astype(str)
+    # datafra = datafra.set_index('ds').asfreq(rarety)
+    # datafra = datafra.reset_index()
+    #
+    # datafra.fillna(mean, inplace=True)
+
+    print(datafra)
+
+
+
+    print(datafra["ds"].tolist()[inp])
+    print(datafra["ds"].tolist()[-(horizon + 1)])
+
+    windowed_df = df_to_windowed_df(datafra,
+                                    datafra["ds"].tolist()[inp],
+                                    datafra["ds"].tolist()[-(horizon+1)],
+                                    n=inp,
+                                    hor=horizon)
+
+    dates, X, Y = windowed_df_to_date_X_y(windowed_df, hor=horizon)
+
+    q_80 = int(len(dates) * .8)
+    q_90 = int(len(dates) * .9)
+
+    dates_train, X_train, y_train = dates[:q_80], X[:q_80], Y[:q_80]
+
+    dates_val, X_val, y_val = dates[q_80:q_90], X[q_80:q_90], Y[q_80:q_90]
+    dates_test, X_test, y_test = dates[q_90:], X[q_90:], Y[q_90:]
+
+    print("__________________________________"*1000)
+    st.session_state.df_forpred = st.session_state.df_forpred.reset_index()
+    print(st.session_state.df_forpred)
+
+    # try:
+
+    # scaler = RobustScaler()
+    # orig_shape = X_train.shape
+    # print(X_train.reshape(-1, X_train.shape[-1]))
+    # X_train = scaler.fit_transform(X_train.reshape(-1, X_train.shape[-1])).reshape(orig_shape)
+    # X_val = scaler.transform(X_val.reshape(-1, X_val.shape[-1])).reshape(X_val.shape)
+    # X_test = scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
+    # st.session_state.scaler = scaler
+    # X_train = torch.tensor(X_train, dtype=torch.float32)
+    # X_val = torch.tensor(X_val, dtype=torch.float32)
+    # X_test = torch.tensor(X_test, dtype=torch.float32)
+    # y_train = torch.tensor(y_train, dtype=torch.float32)
+    # y_val = torch.tensor(y_val, dtype=torch.float32)
+    # y_test = torch.tensor(y_test, dtype=torch.float32)
+    #
+    # if len(y_train.shape) == 1:
+    #     y_train = y_train.unsqueeze(1)
+    # if len(y_val.shape) == 1:
+    #     y_val = y_val.unsqueeze(1)
+    # if len(y_test.shape) == 1:
+    #     y_test = y_test.unsqueeze(1)
+    #
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #
+    # st.session_state.device = device
+    #
+    # def create_reservoir(input_dim, reservoir_size, spectral_radius=0.9):
+    #     W_in = torch.randn(reservoir_size, input_dim) * 0.1
+    #     W_res = torch.randn(reservoir_size, reservoir_size)
+    #
+    #     eigenvalues = torch.linalg.eigvals(W_res)
+    #     max_eigenvalue = torch.max(torch.abs(eigenvalues))
+    #     W_res = W_res * (spectral_radius / max_eigenvalue)
+    #
+    #     return W_in.to(device), W_res.to(device)
+    #
+    # input_dim = X_train.shape[1]
+    # print(input_dim)
+    # reservoir_size = 400
+    #
+    # W_in, W_res = create_reservoir(input_dim, reservoir_size)
+    # st.session_state.reser_size = reservoir_size
+    # st.session_state.win = W_in
+    # st.session_state.wres = W_res
+    # # SNN parameters
+    # beta = 0.5
+    # time_steps = 150
+    # spike_grad = surrogate.fast_sigmoid()
+    #
+
+    import requests
+    import json
+    # URL to your forecast endpoint (adjust domain/IP and port as needed)
+    url = "https://wvrtp7efbuzv24-8000.proxy.runpod.net/forecast"
+
+
+    # Convert the DataFrame into a list of dictionaries.
+    payload = {
+        "data": dafaf.to_dict(orient='records'),
+        "inp": inp,  # Example integer value for inp
+        "horiz": horizon,  # Example integer value for horiz
+        "iter": iter,  # Example integer value for iter
+    }
+
+    # Define the URL of your forecasting endpoint
+
+    # Send a POST request with the JSON payload.
+    response = requests.post(url, json=payload)
+
+    # Check and print the response.
+    data = ""
+    if response.status_code == 200:
+        data = response.json().get("predictions")
+        # print("Forecast predictions:", data)
+    else:
+        print("Error:", response.status_code, response.text)
+
+    # data = json.loads(json_data)
+
+    # --- Reconstruct the PyTorch model ---
+    # Instantiate a new model using the provided class and initialization parameters.
+    # Rebuild the state dictionary: convert lists back into tensors.
+    model_state_serialized = data["model_state"]
+    model_state = {k: torch.tensor(v) for k, v in model_state_serialized.items()}
+    # Load the state dictionary into the model.
+
+
+    # --- Reconstruct the RobustScaler ---
+    scaler_data = data["robust_scaler"]
+    # Create a new RobustScaler instance using the saved parameters.
+    robust_scaler = RobustScaler(**scaler_data["params"])
+    # Set the fitted attributes if available.
+    attributes = scaler_data.get("attributes", {})
+    if "center_" in attributes:
+        robust_scaler.center_ = np.array(attributes["center_"])
+    if "scale_" in attributes:
+        robust_scaler.scale_ = np.array(attributes["scale_"])
+
+    # --- Retrieve and reconstruct the additional tensor values and integer ---
+    tensor_data = data["int_values"]
+    # Convert the lists back into PyTorch tensors.
+    W_in = torch.tensor(tensor_data["W_in"])
+    W_res = torch.tensor(tensor_data["W_res"])
+    reservoir_size = tensor_data["reser"]  # This remains an integer
+    beta = 0.5
+    time_steps = 150
+    spike_grad = surrogate.fast_sigmoid()
+
+    # # Define the SNN model
+    class SNNRegression(nn.Module):
+        def __init__(self, reservoir_size, output_size):
+            super(SNNRegression, self).__init__()
+            self.lif1 = snn.Leaky(beta=beta, spike_grad=spike_grad)
+            self.bn1 = nn.BatchNorm1d(reservoir_size)
+            self.tcn1 = nn.Sequential(
+                nn.Conv1d(in_channels=reservoir_size, out_channels=256, kernel_size=3, padding=1),
+                nn.ReLU(),
+                nn.BatchNorm1d(256),
+                nn.Conv1d(in_channels=256, out_channels=128, kernel_size=3, padding=1),
+                nn.ReLU(),
+                nn.BatchNorm1d(128)
+            )
+
+            self.lif2 = snn.Leaky(beta=beta, spike_grad=spike_grad)
+            self.bn2 = nn.BatchNorm1d(128)
+            self.tcn2 = nn.Sequential(
+                nn.Conv1d(in_channels=128, out_channels=256, kernel_size=3, padding=1),
+                nn.ReLU(),
+                nn.BatchNorm1d(256),
+                nn.Conv1d(in_channels=256, out_channels=output_size, kernel_size=3, padding=1)
+            )
+
+        def forward(self, x):
+            x = x.reshape(x.size(0), -1)
+
+            mem1 = self.lif1.init_leaky()
+            for t in range(time_steps):
+                spk1, mem1 = self.lif1(x, mem1)
+            mem1 = self.bn1(mem1)
+
+            mem1 = mem1.unsqueeze(2)
+            mem1 = self.tcn1(mem1).squeeze(2)
+
+            mem2 = self.lif2.init_leaky()
+            for t in range(time_steps):
+                spk2, mem2 = self.lif2(mem1, mem2)
+            mem2 = self.bn2(mem2)
+
+            mem2 = mem2.unsqueeze(2)
+            out = self.tcn2(mem2).squeeze(2)
+
+            return out
+
+    output_dim = y_train.shape[1]
+    model = SNNRegression(reservoir_size, output_dim).to("cpu")
+    criterion = nn.MSELoss()
+    model.load_state_dict(model_state)
+
+    st.session_state.device = "cpu"
+    st.session_state.reser_size = reservoir_size
+    st.session_state.win = W_in
+    st.session_state.wres = W_res
+    st.session_state.scaler = robust_scaler
+    # optimizer = torch.optim.Adam(model.parameters(), lr=0.1, weight_decay=1e-4)
+    #
+    # scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5,
+    #                                                        verbose=True)
+    #
+    # # Data loaders
+    # batch_size = 32
+    # train_dataset = TensorDataset(X_train, y_train)
+    # val_dataset = TensorDataset(X_val, y_val)
+    # train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    # val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    #
+    # # Training loop
+    # epochs = iter
+    # train_losses = []
+    # val_losses = []
+    #
+    # for epoch in range(epochs):
+    #     model.train()
+    #     train_loss = 0
+    #
+    #     for X_batch, y_batch in train_loader:
+    #         X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+    #
+    #         # Reservoir computation
+    #         reservoir_state = []
+    #         for x in X_batch:
+    #             x = x.unsqueeze(0)  # Ensure x has a batch dimension
+    #             res_state = torch.tanh(W_in @ x.T + W_res @ torch.rand(reservoir_size, 1).to(device))
+    #             reservoir_state.append(res_state.squeeze(1))
+    #         reservoir_state = torch.stack(reservoir_state).to(device)
+    #
+    #         output = model(reservoir_state)
+    #         loss = criterion(output, y_batch)
+    #
+    #         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+    #
+    #         optimizer.zero_grad()
+    #         loss.backward()
+    #         optimizer.step()
+    #
+    #         train_loss += loss.item()
+    #
+    #     train_loss /= len(train_loader)
+    #     train_losses.append(train_loss)
+
+        # model.eval()
+        # val_loss = 0
+        # with torch.no_grad():
+        #     for X_batch, y_batch in val_loader:
+        #         X_batch, y_batch = X_batch.to("cpu"), y_batch.to("cpu")
+        #
+        #         reservoir_state = []
+        #         for x in X_batch:
+        #             x = x.unsqueeze(0)
+        #             res_state = torch.tanh(W_in @ x.T + W_res @ torch.rand(reservoir_size, 1).to(device))
+        #             reservoir_state.append(res_state.squeeze(1))
+        #         reservoir_state = torch.stack(reservoir_state).to(device)
+        #
+        #         output = model(reservoir_state)
+        #         loss = criterion(output, y_batch)
+        #         val_loss += loss.item()
+        #
+        # val_loss /= len(val_loader)
+        # val_losses.append(val_loss)
+        # scheduler.step(val_loss)
+        #
+        # print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+
+    orig_shape = X_train.shape
+    print(X_train.reshape(-1, X_train.shape[-1]))
+    X_test = robust_scaler.transform(X_test.reshape(-1, X_test.shape[-1])).reshape(X_test.shape)
+    st.session_state.scaler = robust_scaler
+    X_test = torch.tensor(X_test, dtype=torch.float32)
+    y_test = torch.tensor(y_test, dtype=torch.float32)
+
+    X_test, y_test = X_test.to("cpu"), y_test.to("cpu")
+    model.eval()
+    with torch.no_grad():
+        reservoir_state = []
+        for x in X_test:
+            x = x.unsqueeze(0)
+            res_state = torch.tanh(W_in @ x.T + W_res @ torch.rand(reservoir_size, 1).to("cpu"))
+            reservoir_state.append(res_state.squeeze(1))
+        reservoir_state = torch.stack(reservoir_state).to("cpu")
+
+        predictions = model(reservoir_state)
+        test_loss = criterion(predictions, y_test)
+        loses = []
+        for i in range(len(predictions)):
+            loses.append(criterion(predictions[i], y_test[i]))
+        print(f"{min(loses):.4f}")
+        ind = 0
+        for i in range(len(loses)):
+            if min(loses) == loses[i]: ind = i
+
+    print(f"Test Loss: {test_loss:.4f}")
+
+    st.session_state.horiz = horizon
+
+    st.session_state.inst_name = "SNN"
+    st.session_state.model_forecast = model
+    st.session_state.mse = float(f"{min(loses):.4f}")
+    sample_idx = ind
+    single_prediction = predictions[sample_idx].cpu().numpy()
+    single_y_test = y_test[sample_idx].cpu().numpy()
+    times = [i for i in range(1, len(single_prediction)-1)]
+    # Create distplot with custom bin_size
+    st.session_state.fig = go.Figure()
+
+    # Plot the data except the last seven days
+    st.session_state.fig.add_trace(go.Scatter(
+        x=times,
+        y=single_y_test,
+        mode='lines',
+        name='Дані',
+        line=dict(color='blue')
+    ))
+
+    # Plot the last seven days in a different color
+    st.session_state.fig.add_trace(go.Scatter(
+        x=times,
+        y=single_prediction,
+        mode='lines',
+        name='Прогноз',
+        line=dict(color='green')
+    ))
+        # st.session_state.fig = px.line(dpred, x='unique_id', y=['real', 'pred'], labels={'value': 'Y values', 'x': 'X values'})
+    # except Exception as ex:
+    #     print(ex)
+    #     st.warning('Надано не коректні гіперпараметри', icon="⚠️")
+
+
+
+@st.cache_data(show_spinner="Робимо прогнозування...")
+def submit_data_TN(datafra, iter, horizon, rarety, inp):
+    if st.session_state.date_not_n:
+        start_date = pd.to_datetime('2024-01-01')
+        rarety = "D"
+        datafra['ds'] = start_date + pd.to_timedelta(datafra['ds'] - 1, rarety)
+
+    datafra['ds'] = pd.to_datetime(datafra['ds'])
+    datafra = datafra.drop_duplicates(subset=['ds'])
+    datafra = datafra.set_index('ds').asfreq(rarety)
+    datafra = datafra.reset_index()
+    datafra['y'] = datafra['y'].interpolate()
+    datafra["unique_id"] = [0 for i in range(1, len(datafra) + 1)]
+    print("s;kgfoshdisdifsdf")
+    print(datafra)
+    st.session_state.df_forpred = datafra
+    try:
+        st.session_state.horiz = horizon
+        q = int(round(len(datafra) * 0.1, 0))
+        fcst = NeuralForecast(
+            models=[
+                TimesNet(h=horizon,
+                         input_size=int(round(inp, 0)),
+                         # output_size=horizon,
+                         max_steps=iter,
+                         scaler_type='standard',
+                         start_padding_enabled=True
+                         ),
+            ],
+            freq=rarety
+        )
+
+        Y_train_df = datafra[:-horizon]
+        Y_test_df = datafra[-horizon:]
+        fcst.fit(df=Y_train_df)
+        forecasts = fcst.predict(futr_df=Y_test_df)
+        st.session_state.mse = mean_squared_error(Y_test_df["y"], forecasts["TimesNet"])
+        st.session_state.inst_name = "TimesNet"
+        st.session_state.model_forecast = fcst
+        print(f'Mean Squared Error: {st.session_state.mse}')
+        print(len(forecasts["TimesNet"]), len(Y_test_df["y"]))
+        print(forecasts.columns)
+        forecasts = forecasts.reset_index(drop=True)
+        print(forecasts.columns.values)
+        print(forecasts["TimesNet"].values.tolist())
+        dpred = pd.DataFrame()
+        dpred["real"] = Y_test_df["y"]
+        dpred["pred"] = forecasts["TimesNet"].values.tolist()
+        dpred["unique_id"] = [i for i in range(1, len(dpred) + 1)]
+        # Create distplot with custom bin_size
+        st.session_state.fig = go.Figure()
+
+        # Plot the data except the last seven days
+        st.session_state.fig.add_trace(go.Scatter(
+            x=dpred["unique_id"],
+            y=dpred["real"],
+            mode='lines',
+            name='Дані',
+            line=dict(color='blue')
+        ))
+
+        # Plot the last seven days in a different color
+        st.session_state.fig.add_trace(go.Scatter(
+            x=dpred["unique_id"],
+            y=dpred["pred"],
+            mode='lines',
+            name='Прогноз',
+            line=dict(color='green')
+        ))
+        print(dpred)
+    except:
+        st.warning('Надано не коректні гіперпараметри', icon="⚠️")
+
+
+@st.cache_data(show_spinner="Робимо прогнозування...")
+def submit_data_TM(datafra, iter, horizon, rarety, inp):
+    if st.session_state.date_not_n:
+        start_date = pd.to_datetime('2024-01-01')
+        rarety = "D"
+        datafra['ds'] = start_date + pd.to_timedelta(datafra['ds'] - 1, rarety)
+
+    datafra['ds'] = pd.to_datetime(datafra['ds'])
+    datafra = datafra.drop_duplicates(subset=['ds'])
+    datafra = datafra.set_index('ds').asfreq(rarety)
+    datafra = datafra.reset_index()
+    datafra['y'] = datafra['y'].interpolate()
+    datafra["unique_id"] = [0 for i in range(1, len(datafra) + 1)]
+    print("s;kgfoshdisdifsdf")
+    print(datafra)
+    st.session_state.df_forpred = datafra
+    try:
+        st.session_state.horiz = horizon
+        q = int(round(len(datafra) * 0.1, 0))
+        fcst = NeuralForecast(
+            models=[
+                TimeMixer(h=horizon,
+                          input_size=int(round(inp, 0)),
+                          # output_size=horizon,
+                          max_steps=iter,
+                          scaler_type='standard',
+                          start_padding_enabled=True,
+                          n_series=1
+                          ),
+            ],
+            freq=rarety
+        )
+
+        Y_train_df = datafra[:-horizon]
+        Y_test_df = datafra[-horizon:]
+        fcst.fit(df=Y_train_df)
+        forecasts = fcst.predict(futr_df=Y_test_df)
+        st.session_state.mse = mean_squared_error(Y_test_df["y"], forecasts["TimeMixer"])
+        st.session_state.inst_name = "TimeMixer"
+        st.session_state.model_forecast = fcst
+        print(f'Mean Squared Error: {st.session_state.mse}')
+        print(len(forecasts["TimeMixer"]), len(Y_test_df["y"]))
+        print(forecasts.columns)
+        forecasts = forecasts.reset_index(drop=True)
+        print(forecasts.columns.values)
+        print(forecasts["TimeMixer"].values.tolist())
+        dpred = pd.DataFrame()
+        dpred["real"] = Y_test_df["y"]
+        dpred["pred"] = forecasts["TimeMixer"].values.tolist()
+        dpred["unique_id"] = [i for i in range(1, len(dpred) + 1)]
+        # Create distplot with custom bin_size
+        st.session_state.fig = go.Figure()
+
+        # Plot the data except the last seven days
+        st.session_state.fig.add_trace(go.Scatter(
+            x=dpred["unique_id"],
+            y=dpred["real"],
+            mode='lines',
+            name='Дані',
+            line=dict(color='blue')
+        ))
+
+        # Plot the last seven days in a different color
+        st.session_state.fig.add_trace(go.Scatter(
+            x=dpred["unique_id"],
+            y=dpred["pred"],
+            mode='lines',
+            name='Прогноз',
+            line=dict(color='green')
+        ))
+        print(dpred)
+    except:
+        st.warning('Надано не коректні гіперпараметри', icon="⚠️")
 
 
 @st.cache_data(show_spinner="Робимо прогнозування...")
