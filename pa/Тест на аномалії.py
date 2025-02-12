@@ -495,39 +495,39 @@ if st.session_state.df is not None:
     # st.session_state.df_forpred = ds_for_pred
 
     with st.container():
-        st.title("Тестування часового ряду на аномалії")
+        st.title("Аналіз часового ряду на аномалії")
         # st.markdown("### ")
-        st.markdown("#### Тестування часових рядів на виявлення аномалій є важливим етапом аналізу, що дозволяє ідентифікувати нехарактерні або несподівані зміни в даних, які можуть свідчити про значущі події або проблеми у функціонуванні системи. Аномалії можуть бути ознакою технічних несправностей, системних збоїв або навіть випадків шахрайства у фінансових даних. Вчасне виявлення таких відхилень сприяє запобіганню критичним помилкам та мінімізації ризиків.")
+        st.markdown("#### Аналіз часових рядів на виявлення аномалій є важливим етапом аналізу, що дозволяє ідентифікувати нехарактерні або несподівані зміни в даних, які можуть свідчити про значущі події або проблеми у функціонуванні системи. Аномалії можуть бути ознакою технічних несправностей, системних збоїв або навіть випадків шахрайства у фінансових даних. Вчасне виявлення таких відхилень сприяє запобіганню критичним помилкам та мінімізації ризиків.")
 
     st.markdown("### ")
     # fr = st.selectbox("Оберіть частоту запису даних в ряді:",
     #                   ["Місяць", "День", "Рік", "Хвилина", "Секунда", "Година"]
     print(means[st.session_state.freq])
-    st.button(label="Провести тестування", key="anom", on_click=anomal,
+    st.button(label="Провести аналіз", key="anom", on_click=anomal,
                     args=(st.session_state.df_anom, means[st.session_state.freq]))
 
 
     st.divider()
     if st.session_state.datanom is not None:
 
-        st.markdown("# Результат проведення тестування")
+        st.markdown("# Результат проведення аналізу")
         datafra = st.session_state.datanom.rename(columns={"NBEATSx": "preds"})
         datafra = datafra.reset_index()
         print("preds", "-" * 100)
         print(datafra)
         col3, col4 = st.columns(2)
         with col3:
-            with st.expander("Подивитись тест даних на аномалії:"):
+            with st.expander("Подивитись аналіз даних на аномалії:"):
                 st.write(st.session_state.datanom)
         with col4:
             st.download_button(
-                label="Завантажити тест як файл .csv",
+                label="Завантажити аналіз як файл .csv",
                 data=st.session_state.datanom.to_csv().encode("utf-8"),
                 file_name="anomaly.csv",
                 mime="text/csv"
             )
             st.download_button(
-                label="Завантажити тест як файл .xlsx",
+                label="Завантажити аналіз як файл .xlsx",
                 data=to_excel(st.session_state.datanom),
                 file_name="anomaly.xlsx",
                 mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -583,4 +583,4 @@ if st.session_state.df is not None:
     # if len(st.session_state['score']) != 0:
     #     st.subheader(f"The model has an F1-Score of: {st.session_state['score'][-1]}")
 else:
-    st.warning('Для проведення тесту на аномалії, оберіть дані', icon="⚠️")
+    st.warning('Для проведення аналізу на аномалії, оберіть дані', icon="⚠️")
