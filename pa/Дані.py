@@ -130,19 +130,19 @@ def submit_data(dataframe, date_col, target_col, name, fr):
 with st.container():
     st.title("Оберіть з якими даними Ви бажаєте працювати")
 
-# Create two columns for buttons
+
 st.markdown('<div class="button-container">', unsafe_allow_html=True)
 col1, col2, col3, col4 = st.columns(4)
 
-# Button for selecting experimental data
+
 with col1:
     st.button(label="Обрати тестувальні", on_click=click_button)
 st.markdown('</div>', unsafe_allow_html=True)
-# Button for selecting own data
+
 with col4:
     st.button(label="Обрати свої", on_click=click_button2)
 
-# If experimental data button is clicked, show additional options
+
 if st.session_state.clicked:
     st.markdown(
         "### Ви обрали тестові дані. Це набори даних, призначені для тестування, які дозволяють ознайомитися з функціональними можливостями проєкту та визначити, яка модель буде найбільш відповідною.")
@@ -186,7 +186,6 @@ if st.session_state.clicked:
         st.button(label="Підтвердити", key="submit1", on_click=submit_data,
               args=(dataframe, "date", "target", "Тестовий набір даних 1", "День"))
 
-    # Test 2: Load AXISBANK-BSE.csv and allow submission
     if t2:
         dataframe = pd.read_csv("Weather_dataset.csv")
         st.markdown(
@@ -198,12 +197,11 @@ if st.session_state.clicked:
         with c2:
             fig = go.Figure()
 
-            # Add actual values
+
             fig.add_trace(
                 go.Scatter(x=dataframe['date'], y=dataframe['target'], mode='lines', name='Дані',
                            line=dict(color='blue')))
 
-            # Add title and labels
             fig.update_layout(
                 title="Тестовий набір даних 2",
                 xaxis_title='Дата',
@@ -215,7 +213,6 @@ if st.session_state.clicked:
                   args=(dataframe, "date", "target", "Тестовий набір даних 2", "Година"))
 
 
-    # Test 3: Load electricityConsumptionAndProduction.csv and allow submission
     if t3:
         dataframe = pd.read_csv("electricityConsumptionAndProductioction.csv")
         st.markdown(
@@ -228,12 +225,11 @@ if st.session_state.clicked:
         with c2:
             fig = go.Figure()
 
-            # Add actual values
+
             fig.add_trace(
                 go.Scatter(x=dataframe['date'], y=dataframe['target'], mode='lines', name='Дані',
                            line=dict(color='blue')))
 
-            # Add title and labels
             fig.update_layout(
                 title="Тестовий набір даних 3",
                 xaxis_title='Дата',
@@ -256,12 +252,11 @@ if st.session_state.clicked:
         with c2:
             fig = go.Figure()
 
-            # Add actual values
             fig.add_trace(
                 go.Scatter(x=dataframe['date'], y=dataframe['target'], mode='lines', name='Дані',
                            line=dict(color='blue')))
 
-            # Add title and labels
+
             fig.update_layout(
                 title="Тестовий набір даних 4",
                 xaxis_title='Дата',
@@ -272,7 +267,7 @@ if st.session_state.clicked:
         st.button(label="Підтвердити", key="submit4", on_click=submit_data,
                   args=(dataframe, "date", "target", "Тестовий набір даних 4", "День"))
 
-# If own data button is clicked, allow file upload
+
 if st.session_state.clicked2:
     st.markdown("### Ви обрали свої дані. Наразі основні вимоги до даних це:")
     st.markdown(
@@ -302,12 +297,12 @@ if st.session_state.clicked2:
                           ["Місяць", "День", "Рік", "Хвилина", "Секунда", "Година"])
         fig = go.Figure()
 
-        # Add actual values
+
         fig.add_trace(
             go.Scatter(x=dataframe[option], y=dataframe[option2], mode='lines', name='Дані',
                        line=dict(color='blue')))
 
-        # Add title and labels
+
         fig.update_layout(
             title=f"{uploaded_file.name}",
             xaxis_title='Дата',
@@ -319,7 +314,7 @@ if st.session_state.clicked2:
         st.button(label="Підтвердити", key="submit_own", on_click=submit_data,
                   args=(dataframe, option, option2, uploaded_file.name, fr))
 
-# After submission, show the dataframe and success message
+
 if st.session_state.submitted:
     st.success(
         f"Дані датасету {st.session_state.name} успішно завантажені! Тепер можете перейти до розділу 'Налаштування моделі'")
