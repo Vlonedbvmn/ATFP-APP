@@ -126,7 +126,7 @@ def response_1(chr):
                 yield word + " "
                 time.sleep(0.1)
 
-# Streamed response emulator
+
 def response_generator(datafra, res):
     my_bar = st.progress(0, text="Статус відповіді")
     my_bar.progress(33, "Запит отримано")
@@ -2285,7 +2285,6 @@ if st.session_state.df is not None:
             st.write(message["content"])
     st.write(" ")
     st.markdown("## Чат")
-    # Display chat messages from history on app rerun
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             # if isinstance(message["content"],str):
@@ -2294,7 +2293,6 @@ if st.session_state.df is not None:
             #     st.plotly_chart(message["content"])
             # else:
             st.write(message["content"])
-    # Accept user input
     if prompt := st.chat_input("Напишіть свій запит і отримайте відповідь"):
         # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
@@ -2304,7 +2302,6 @@ if st.session_state.df is not None:
 
         # st.session_state.messages.append({"role": "assistant", "content": "Дякую за запитання, інтерпритую ваш запит до моделі прогнозування"})
 
-        # Display assistant response in chat message container
         with st.chat_message("assistant"):
             gen = response_generator(ds_for_pred, prompt)
             response = st.write_stream(gen)
