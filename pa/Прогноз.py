@@ -42,7 +42,7 @@ if 'bp' not in st.session_state:
 # )
 
 
-# Define button click functions
+
 
 
 
@@ -159,10 +159,10 @@ if st.session_state.inst_name is not None:
     with st.container():
         st.title("Прогноз")
 
-    # Create two columns for buttons
+
     col1, col2 = st.columns(2)
 
-    # Button for selecting experimental data
+
     with col1:
         st.markdown(f"### Модель: {st.session_state.inst_name}")
         dff = pd.DataFrame()
@@ -174,7 +174,7 @@ if st.session_state.inst_name is not None:
         st.button(label="Прогноз", key="pr", on_click=predd,
                   args=(dff,))
 
-    # Button for selecting own data
+
     with col2:
         st.markdown(f"### Дані:")
         with st.expander("Подивитися обраний датасет:"):
@@ -260,7 +260,7 @@ if st.session_state.inst_name is not None:
             if lower_forecast is not None:
                 max_value = max(upper_forecast.tolist())+100
                 min_value = min(lower_forecast.tolist()) - 100
-            # First, add the upper bound trace (invisible line) to serve as the fill ceiling.
+
             st.session_state.plotp.add_trace(go.Scatter(
                 x=last_days[st.session_state.date][:(slid)],
                 y=upper_forecast,
@@ -281,7 +281,7 @@ if st.session_state.inst_name is not None:
                 name='Діапазон можливих значень прогнозу'
             ))
 
-            # Finally, add the median (50% quantile) forecast line on top.
+
             st.session_state.plotp.add_trace(go.Scatter(
                 x=last_days[st.session_state.date][:(slid)],
                 y=q50,
@@ -289,7 +289,7 @@ if st.session_state.inst_name is not None:
                 name='Прогноз',
                 line=dict(color='green')
             ))
-            # Update layout (optional)
+
             st.session_state.plotp.update_layout(
                 xaxis_title='Дата',
                 # yaxis_title='Значення',
@@ -300,10 +300,10 @@ if st.session_state.inst_name is not None:
                 title="Графік прогнозу", # Increase the overall height
             )
 
-            # Show the plot
+
             st.plotly_chart(st.session_state.plotp, use_container_width=True)
 
-            # Plot the data except the last seven days
+
 
             st.session_state.bp = go.Figure()
 
@@ -314,7 +314,7 @@ if st.session_state.inst_name is not None:
                 marker_color='green'
             ))
 
-            # Customize layout
+
             st.session_state.bp.update_layout(
                 title='Барплот прогнозу',
                 xaxis_title='Дата',
