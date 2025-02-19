@@ -740,7 +740,7 @@ def submit_data_SNN(datafra, iter, horizon, rarety, inp):
     
         import requests
         import json
-        url = "https://uy3b78jw8tf6lu-8000.proxy.runpod.net/forecast"
+        url = "https://u0v2p7ktgidrwj-8000.proxy.runpod.net/forecast"
     
     
         payload = {
