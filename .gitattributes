@@ -1,2 +1,0 @@
-pa/models/** filter=lfs diff=lfs merge=lfs -text
-pa/crypto_models/** filter=lfs diff=lfs merge=lfs -text
