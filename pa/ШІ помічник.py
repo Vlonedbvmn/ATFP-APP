@@ -30,7 +30,7 @@ means = {"Місяць": "M",
          }
 
 
-client = Groq(api_key="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")
+client = Groq(api_key="...")
 
 
 
